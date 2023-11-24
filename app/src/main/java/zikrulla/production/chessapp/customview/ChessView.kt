@@ -15,6 +15,7 @@ import android.view.View
 import zikrulla.production.chessapp.R
 import zikrulla.production.chessapp.model.ChessDelegate
 import zikrulla.production.chessapp.model.ChessPiece
+import zikrulla.production.chessapp.model.Square
 import kotlin.math.min
 
 class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
@@ -72,7 +73,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             ACTION_DOWN -> {
                 fromCol = ((event.x - originX) / cellSide).toInt()
                 fromRow = 7 - ((event.y - originY) / cellSide).toInt()
-                chessDelegate?.pieceAt(fromCol, fromRow)?.let {
+                chessDelegate?.pieceAt(Square(fromCol, fromRow))?.let {
                     movingPiece = it
                     movingPieceDrawable = drawables[it.resId]
                 }
@@ -87,7 +88,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
-                chessDelegate?.movePiece(fromCol, fromRow, col, row)
+                chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
                 movingPieceDrawable = null
                 movingPiece = null
                 invalidate()
@@ -99,7 +100,7 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun drawPieces(canvas: Canvas) {
         for (row in 0..7) {
             for (col in 0..7) {
-                chessDelegate?.pieceAt(col, row)?.let {
+                chessDelegate?.pieceAt(Square(col, row))?.let {
                     if (movingPiece != it)
                         drawPieceAt(canvas, col, row, it.resId)
                 }

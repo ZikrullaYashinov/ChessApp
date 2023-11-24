@@ -1,6 +1,7 @@
 package zikrulla.production.chessapp.model
 
 import zikrulla.production.chessapp.R
+import kotlin.math.abs
 
 object ChessGame : ChessDelegate {
 
@@ -8,78 +9,165 @@ object ChessGame : ChessDelegate {
 
     init {
         reset()
-//        movePiece(0, 1, 0, 3)
-//        movePiece(0, 0, 1, 0)
-//        movePiece(1, 0, 0, 0)
     }
 
-    override fun movePiece(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int) {
-        if (fromRow == toRow && fromCol == toCol) return
-        val piece = pieceAt(fromCol, fromRow) ?: return
+    override fun movePiece(from: Square, to: Square) {
+        if (canMove(from, to))
+            movePiecePrivate(from, to)
+    }
 
-        pieceAt(toCol, toRow)?.let {
+    private fun movePiecePrivate(from: Square, to: Square) {
+        if (from.row == to.row && from.col == to.col) return
+        if (to.col > 7 || from.row > 7 || to.col < 0 || from.row < 0) return
+        val piece = pieceAt(from) ?: return
+
+        pieceAt(to)?.let {
             if (it.player == piece.player) return
             piecesBox.remove(it)
         }
 
         piecesBox.remove(piece)
-        piecesBox.add(piece.copy(col = toCol, row = toRow))
+        addPiece(piece.copy(col = to.col, row = to.row))
+    }
+
+    fun addPiece(piece: ChessPiece) {
+        piecesBox.add(piece)
+    }
+
+    fun clear() {
+        piecesBox.clear()
+    }
+
+    private fun isClearHorizontallyBetween(from: Square, to: Square): Boolean {
+        if (from.row != to.row) return false
+        val gap = abs(from.col - to.col) - 1
+        if (gap == 0) return true
+        for (i in 1..gap) {
+            val nextCol = if (to.col > from.col) from.col + i else from.col - i
+            pieceAt(Square(nextCol, from.row))?.let {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isClearVerticallyBetween(from: Square, to: Square): Boolean {
+        if (from.col != to.col) return false
+        val gap = abs(from.row - to.row) - 1
+        if (gap == 0) return true
+        for (i in 1..gap) {
+            val nextRow = if (to.row > from.row) from.row + i else from.row - i
+            pieceAt(Square(from.col, nextRow))?.let {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun isClearDiagonallyBetween(from: Square, to: Square): Boolean {
+        val gapCol = abs(from.col - to.col) - 1
+        val gapRow = abs(from.row - to.row) - 1
+        if (gapCol == 0 && gapRow == 0) return true
+        for (i in 1..gapRow) {
+            val nextCol = if (to.col > from.col) from.col + i else from.col - i
+            val nextRow = if (to.row > from.row) from.row + i else from.row - i
+            pieceAt(Square(nextCol, nextRow))?.let {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun canKnightMove(from: Square, to: Square): Boolean {
+        return abs(from.col - to.col) == 2 && abs(from.row - to.row) == 1 ||
+                abs(from.col - to.col) == 1 && abs(from.row - to.row) == 2
+    }
+
+    private fun canRookMove(from: Square, to: Square): Boolean {
+        return from.col == to.col && isClearVerticallyBetween(from, to)
+                || from.row == to.row && isClearHorizontallyBetween(from, to)
+    }
+
+    private fun canBishopMove(from: Square, to: Square): Boolean {
+        return abs(from.col - to.col) == abs(from.row - to.row)
+                && isClearDiagonallyBetween(from, to)
+    }
+
+    private fun canQueenMove(from: Square, to: Square): Boolean {
+        return canBishopMove(from, to) || canRookMove(from, to)
+    }
+
+    private fun canKingMove(from: Square, to: Square): Boolean {
+        return 1 >= abs(from.col - to.col) && 1 >= abs(from.row - to.row)
+    }
+
+    fun canMove(from: Square, to: Square): Boolean {
+        if (from.row == to.row && from.col == to.col) return false
+        val piece = pieceAt(from) ?: return false
+        return when (piece.chessman) {
+            Chessman.KING -> canKingMove(from, to)
+            Chessman.QUEEN -> canQueenMove(from, to)
+            Chessman.ROOK -> canRookMove(from, to)
+            Chessman.BISHOP -> canBishopMove(from, to)
+            Chessman.KNIGHT -> canKnightMove(from, to)
+            Chessman.PAWN -> true
+        }
     }
 
     fun reset() {
-        piecesBox.clear()
+        clear()
         for (col in 0..7) {
-            piecesBox.add(
-                ChessPiece(col, 1, ChessPlayer.WHITE, ChessRank.PAWN, R.drawable.chess_plt)
+            addPiece(
+                ChessPiece(col, 1, Player.WHITE, Chessman.PAWN, R.drawable.chess_plt)
             )
-            piecesBox.add(
-                ChessPiece(col, 6, ChessPlayer.BLACK, ChessRank.PAWN, R.drawable.chess_pdt)
+            addPiece(
+                ChessPiece(col, 6, Player.BLACK, Chessman.PAWN, R.drawable.chess_pdt)
             )
         }
         for (i in 0..1) {
-            piecesBox.add(
-                ChessPiece(i * 7, 0, ChessPlayer.WHITE, ChessRank.ROOK, R.drawable.chess_rlt)
+            addPiece(
+                ChessPiece(i * 7, 0, Player.WHITE, Chessman.ROOK, R.drawable.chess_rlt)
             )
-            piecesBox.add(
-                ChessPiece(i * 7, 7, ChessPlayer.BLACK, ChessRank.ROOK, R.drawable.chess_rdt)
+            addPiece(
+                ChessPiece(i * 7, 7, Player.BLACK, Chessman.ROOK, R.drawable.chess_rdt)
             )
-            piecesBox.add(
-                ChessPiece(1 + i * 5, 0, ChessPlayer.WHITE, ChessRank.KNIGHT, R.drawable.chess_nlt)
+            addPiece(
+                ChessPiece(1 + i * 5, 0, Player.WHITE, Chessman.KNIGHT, R.drawable.chess_nlt)
             )
-            piecesBox.add(
-                ChessPiece(1 + i * 5, 7, ChessPlayer.BLACK, ChessRank.KNIGHT, R.drawable.chess_ndt)
+            addPiece(
+                ChessPiece(1 + i * 5, 7, Player.BLACK, Chessman.KNIGHT, R.drawable.chess_ndt)
             )
-            piecesBox.add(
-                ChessPiece(2 + i * 3, 0, ChessPlayer.WHITE, ChessRank.BISHOP, R.drawable.chess_blt)
+            addPiece(
+                ChessPiece(2 + i * 3, 0, Player.WHITE, Chessman.BISHOP, R.drawable.chess_blt)
             )
-            piecesBox.add(
-                ChessPiece(2 + i * 3, 7, ChessPlayer.BLACK, ChessRank.BISHOP, R.drawable.chess_bdt)
+            addPiece(
+                ChessPiece(2 + i * 3, 7, Player.BLACK, Chessman.BISHOP, R.drawable.chess_bdt)
             )
         }
-        piecesBox.add(
-            ChessPiece(3, 0, ChessPlayer.WHITE, ChessRank.QUEEN, R.drawable.chess_qlt)
+        addPiece(
+            ChessPiece(3, 0, Player.WHITE, Chessman.QUEEN, R.drawable.chess_qlt)
         )
-        piecesBox.add(
-            ChessPiece(3, 7, ChessPlayer.BLACK, ChessRank.QUEEN, R.drawable.chess_qdt)
+        addPiece(
+            ChessPiece(3, 7, Player.BLACK, Chessman.QUEEN, R.drawable.chess_qdt)
         )
-        piecesBox.add(
-            ChessPiece(4, 0, ChessPlayer.WHITE, ChessRank.KING, R.drawable.chess_klt)
+        addPiece(
+            ChessPiece(4, 0, Player.WHITE, Chessman.KING, R.drawable.chess_klt)
         )
-        piecesBox.add(
-            ChessPiece(4, 7, ChessPlayer.BLACK, ChessRank.KING, R.drawable.chess_kdt)
+        addPiece(
+            ChessPiece(4, 7, Player.BLACK, Chessman.KING, R.drawable.chess_kdt)
         )
     }
 
-    override fun pieceAt(col: Int, row: Int): ChessPiece? {
+    override fun pieceAt(square: Square): ChessPiece? {
         piecesBox.forEach {
-            if (col == it.col && row == it.row) {
+            if (square.col == it.col && square.row == it.row) {
                 return it
             }
         }
         return null
     }
 
-    fun pgn(): String {
+    fun pgnBoard(): String {
         var desc = ""
         desc += "  a b c d e f g h\n"
         for (row in 7 downTo 0) {
@@ -105,17 +193,17 @@ object ChessGame : ChessDelegate {
     private fun boardRow(row: Int): String {
         var desc = ""
         for (col in 0..7) {
-            val piece = pieceAt(col, row)
+            val piece = pieceAt(Square(col, row))
             desc += " "
             desc += piece?.let {
-                val white = piece.player == ChessPlayer.WHITE
-                when (piece.rank) {
-                    ChessRank.KING -> if (white) "k" else "K"
-                    ChessRank.QUEEN -> if (white) "q" else "Q"
-                    ChessRank.ROOK -> if (white) "r" else "R"
-                    ChessRank.BISHOP -> if (white) "b" else "B"
-                    ChessRank.KNIGHT -> if (white) "n" else "N"
-                    ChessRank.PAWN -> if (white) "p" else "P"
+                val white = piece.player == Player.WHITE
+                when (piece.chessman) {
+                    Chessman.KING -> if (white) "k" else "K"
+                    Chessman.QUEEN -> if (white) "q" else "Q"
+                    Chessman.ROOK -> if (white) "r" else "R"
+                    Chessman.BISHOP -> if (white) "b" else "B"
+                    Chessman.KNIGHT -> if (white) "n" else "N"
+                    Chessman.PAWN -> if (white) "p" else "P"
                 }
             } ?: "."
         }

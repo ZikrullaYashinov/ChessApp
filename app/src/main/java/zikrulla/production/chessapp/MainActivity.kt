@@ -7,6 +7,7 @@ import zikrulla.production.chessapp.databinding.ActivityMainBinding
 import zikrulla.production.chessapp.model.ChessPiece
 import zikrulla.production.chessapp.model.ChessDelegate
 import zikrulla.production.chessapp.model.ChessGame
+import zikrulla.production.chessapp.model.Square
 
 class MainActivity : AppCompatActivity(), ChessDelegate {
 
@@ -34,12 +35,12 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         Log.d(TAG, ChessGame.toString())
     }
 
-    override fun pieceAt(col: Int, row: Int): ChessPiece? {
-        return ChessGame.pieceAt(col, row)
+    override fun pieceAt(square: Square): ChessPiece? {
+        return ChessGame.pieceAt(square)
     }
 
-    override fun movePiece(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int) {
-        ChessGame.movePiece(fromCol, fromRow, toCol, toRow)
+    override fun movePiece(from: Square, to: Square) {
+        ChessGame.movePiece(from, to)
         binding.chessView.invalidate()
     }
 }

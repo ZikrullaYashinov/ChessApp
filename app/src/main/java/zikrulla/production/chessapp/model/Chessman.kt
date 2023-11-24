@@ -1,6 +1,6 @@
 package zikrulla.production.chessapp.model
 
-enum class ChessRank {
+enum class Chessman {
     KING,
     QUEEN,
     ROOK,

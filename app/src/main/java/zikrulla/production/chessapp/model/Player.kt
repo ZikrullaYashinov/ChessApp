@@ -1,6 +1,6 @@
 package zikrulla.production.chessapp.model
 
-enum class ChessPlayer {
+enum class Player {
     WHITE,
     BLACK
 }
