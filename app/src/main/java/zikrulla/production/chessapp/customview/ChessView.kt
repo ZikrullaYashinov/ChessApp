@@ -88,7 +88,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
             ACTION_UP -> {
                 val col = ((event.x - originX) / cellSide).toInt()
                 val row = 7 - ((event.y - originY) / cellSide).toInt()
-                chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
+                if (col in 0..7 && row in 0..7)
+                    chessDelegate?.movePiece(Square(fromCol, fromRow), Square(col, row))
                 movingPieceDrawable = null
                 movingPiece = null
                 invalidate()

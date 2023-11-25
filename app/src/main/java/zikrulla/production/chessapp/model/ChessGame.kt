@@ -97,20 +97,63 @@ object ChessGame : ChessDelegate {
         return canBishopMove(from, to) || canRookMove(from, to)
     }
 
-    private fun canKingMove(from: Square, to: Square): Boolean {
-        return 1 >= abs(from.col - to.col) && 1 >= abs(from.row - to.row)
+    private fun canKingMove(from: Square, to: Square, isOppositeSide: Boolean): Boolean {
+        return 1 >= abs(from.col - to.col) && 1 >= abs(from.row - to.row) && !isOppositeSide
+    }
+
+    private fun canPawnMove(from: Square, to: Square, player: Player, isAttack: Boolean): Boolean {
+        return when (player) {
+            Player.WHITE -> {
+                val deltaRow = to.row - from.row
+                if (deltaRow <= 0) return false
+                if (isAttack) {
+                    if (deltaRow == 1 && abs(to.col - from.col) == 1)
+                        return true
+                } else {
+                    val piece = pieceAt(to)
+                    if ((deltaRow) <= 2 && from.col == to.col && piece == null)
+                        return if (from.row != 1) deltaRow == 1 else true
+                    else if (piece != null && canPawnMove(from, to, player, true)) {
+                        return true
+                    }
+                }
+                false
+            }
+
+            Player.BLACK -> {
+                val deltaRow = from.row - to.row
+                if (deltaRow <= 0) return false
+                if (isAttack) {
+                    if (deltaRow == 1 && abs(to.col - from.col) == 1)
+                        return true
+                } else {
+                    val piece = pieceAt(to)
+                    if ((deltaRow) <= 2 && from.col == to.col && piece == null)
+                        return if (from.row != 6) deltaRow == 1 else true
+                    else if (piece != null && canPawnMove(from, to, player, true)) {
+                        return true
+                    }
+                }
+                false
+            }
+        }
     }
 
     fun canMove(from: Square, to: Square): Boolean {
         if (from.row == to.row && from.col == to.col) return false
         val piece = pieceAt(from) ?: return false
+        val playerOpposite = if (piece.player == Player.WHITE) Player.BLACK else Player.WHITE
         return when (piece.chessman) {
-            Chessman.KING -> canKingMove(from, to)
+            Chessman.KING -> {
+                val oppositeSide = isOppositeSide(playerOpposite, to)
+                canKingMove(from, to, oppositeSide)
+            }
+
             Chessman.QUEEN -> canQueenMove(from, to)
             Chessman.ROOK -> canRookMove(from, to)
             Chessman.BISHOP -> canBishopMove(from, to)
             Chessman.KNIGHT -> canKnightMove(from, to)
-            Chessman.PAWN -> true
+            Chessman.PAWN -> canPawnMove(from, to, piece.player, false)
         }
     }
 
@@ -167,6 +210,36 @@ object ChessGame : ChessDelegate {
         return null
     }
 
+    fun find(chessman: Chessman, player: Player): ChessPiece? {
+        piecesBox.forEach {
+            if (it.chessman == chessman && it.player == player) {
+                return it
+            }
+        }
+        return null
+    }
+
+    private fun isOppositeSide(player: Player, to: Square): Boolean {
+        piecesBox.forEach { piece ->
+            if (piece.player == player) {
+                if (piece.chessman == Chessman.KING) {
+                    if (find(Chessman.KING, player)?.let {
+                            abs(it.col - to.col) <= 1 && abs(it.row - to.row) <= 1
+                        } == true) {
+                        return true
+                    }
+                } else if (piece.chessman == Chessman.PAWN) {
+                    if (canPawnMove(Square(piece.col, piece.row), to, piece.player, true))
+                        return true
+                } else
+                    if (canMove(Square(piece.col, piece.row), to))
+                        return true
+            }
+        }
+        return false
+    }
+
+
     fun pgnBoard(): String {
         var desc = ""
         desc += "  a b c d e f g h\n"
@@ -209,4 +282,5 @@ object ChessGame : ChessDelegate {
         }
         return desc
     }
+
 }
