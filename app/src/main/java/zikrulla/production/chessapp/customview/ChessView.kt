@@ -12,8 +12,8 @@ import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import android.view.View
+import zikrulla.production.chessapp.ChessDelegate
 import zikrulla.production.chessapp.R
-import zikrulla.production.chessapp.model.ChessDelegate
 import zikrulla.production.chessapp.model.ChessPiece
 import zikrulla.production.chessapp.model.Square
 import kotlin.math.min

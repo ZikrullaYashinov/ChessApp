@@ -3,4 +3,6 @@
     <string name="reset">Reset</string>
     <string name="listen">Listen</string>
     <string name="connect">Connect</string>
+    <string name="backward">Backward</string>
+    <string name="forward">Forward</string>
 </resources>

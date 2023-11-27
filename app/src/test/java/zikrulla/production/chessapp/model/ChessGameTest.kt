@@ -3,6 +3,7 @@ package zikrulla.production.chessapp.model
 import junit.framework.TestCase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import zikrulla.production.chessapp.ChessGame
 
 class ChessGameTest : TestCase() {
 
@@ -50,8 +51,21 @@ class ChessGameTest : TestCase() {
     }
 
     @Test
-    fun testReset() {
+    fun testIsOppositeSide() {
+//        ChessGame.isOppositeSide(Player.WHITE, Square(5,  5), Square())
     }
+
+    @Test
+    fun testBackward() {
+        ChessGame.movePiece(Square(6, 0), Square(5, 2))
+        ChessGame.movePiece(Square(6, 7), Square(5, 5))
+        ChessGame.movePiece(Square(4, 1), Square(4, 2))
+        ChessGame.movePiece(Square(4, 6), Square(4, 5))
+        ChessGame.movePiece(Square(5, 0), Square(4, 1))
+        ChessGame.movePiece(Square(5, 7), Square(4, 6))
+        assertTrue(ChessGame.movePiece(Square(4, 0), Square(6, 0)))
+    }
+
 
     @Test
     fun testPieceAt() {

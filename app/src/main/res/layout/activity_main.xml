@@ -31,16 +31,16 @@
                 android:text="@string/reset" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/listen"
+                android:id="@+id/backward"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/listen" />
+                android:text="@string/backward" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/connect"
+                android:id="@+id/forward"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/connect" />
+                android:text="@string/forward" />
         </LinearLayout>
     </LinearLayout>
 

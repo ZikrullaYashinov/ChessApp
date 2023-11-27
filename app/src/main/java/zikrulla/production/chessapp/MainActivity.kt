@@ -5,8 +5,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import zikrulla.production.chessapp.databinding.ActivityMainBinding
 import zikrulla.production.chessapp.model.ChessPiece
-import zikrulla.production.chessapp.model.ChessDelegate
-import zikrulla.production.chessapp.model.ChessGame
 import zikrulla.production.chessapp.model.Square
 
 class MainActivity : AppCompatActivity(), ChessDelegate {
@@ -22,14 +20,16 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         binding.apply {
             chessView.chessDelegate = this@MainActivity
             reset.setOnClickListener {
-                ChessGame.reset()
+                ChessGame.resetGame()
                 chessView.invalidate()
             }
-            listen.setOnClickListener {
-
+            backward.setOnClickListener {
+                ChessGame.showMove(false)
+                chessView.invalidate()
             }
-            connect.setOnClickListener {
-
+            forward.setOnClickListener {
+                ChessGame.showMove(true)
+                chessView.invalidate()
             }
         }
         Log.d(TAG, ChessGame.toString())
@@ -39,8 +39,11 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         return ChessGame.pieceAt(square)
     }
 
-    override fun movePiece(from: Square, to: Square) {
-        ChessGame.movePiece(from, to)
+    override fun movePiece(from: Square, to: Square): Boolean {
+        val result = ChessGame.movePiece(from, to)
         binding.chessView.invalidate()
+        return result
     }
+
+
 }
