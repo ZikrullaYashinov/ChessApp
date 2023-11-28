@@ -468,9 +468,14 @@ object ChessGame : ChessDelegate {
             for (i in 0..position) {
                 val move = moveList[i]
                 val from = Square(move.piece.col, move.piece.row)
-                movePiece(from, move.toSquare, true)
+                val movePiece = movePiece(from, move.toSquare)
+//                if (movePiece) backwardPosition++
             }
+//            for (i in position + 1 until moveList.size)
+//                moves.add()
         }
+        if (position + 1 <= moveList.size - 1)
+            moves.addAll(moveList.subList(position + 1, moveList.size))
     }
 
     private fun backward() {
