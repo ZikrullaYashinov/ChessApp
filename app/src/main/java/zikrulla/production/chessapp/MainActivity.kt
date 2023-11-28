@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         return ChessGame.pieceAt(square)
     }
 
-    override fun movePiece(from: Square, to: Square): Boolean {
+    override fun movePiece(from: Square, to: Square, isShow: Boolean?): Boolean {
         val result = ChessGame.movePiece(from, to)
         binding.chessView.invalidate()
         return result

@@ -57,7 +57,7 @@ object ChessGame : ChessDelegate {
         piecesBox.clear()
     }
 
-    override fun movePiece(from: Square, to: Square): Boolean {
+    override fun movePiece(from: Square, to: Square, isShow: Boolean?): Boolean {
         val isMove = if (moves.size % 2 == 0) Player.WHITE else Player.BLACK
         val checkKing = isCheckKing(isMove)
         val r = canMove(from, to, isMove, checkKing)
@@ -146,6 +146,7 @@ object ChessGame : ChessDelegate {
     }
 
     private fun canQueenMove(from: Square, to: Square): Boolean {
+        if (from == to) return false
         return canBishopMove(from, to) || canRookMove(from, to)
     }
 
@@ -160,8 +161,8 @@ object ChessGame : ChessDelegate {
         if (abs(from.col - to.col) == 2 && player != null) {
             var fromRook: Square? = null
             var toRook: Square? = null
-            var haveGot = true
-            var isClear = true
+            var haveGot: Boolean
+            val isClear: Boolean
             var isOppositeSideBoards = true
             var isNotMove = true
             if (orientation == null || orientation == true) {
@@ -171,20 +172,20 @@ object ChessGame : ChessDelegate {
                     var rookSquare = Square(7, 0)
                     if (to.col == 6 && to.row == 0) {
                         fromRook = rookSquare
-                        toRook = Square(5,0)
+                        toRook = Square(5, 0)
                         rookSquare = Square(7, 0)
                         haveGot = haveGot && pieceAt(rookSquare)?.let {
                             it.chessman == Chessman.ROOK && it.player == player
                         } ?: false
                     } else if (to.col == 2 && to.row == 0) {
                         rookSquare = Square(0, 0)
-                        toRook = Square(3,0)
+                        toRook = Square(3, 0)
                         fromRook = rookSquare
                         haveGot = haveGot && pieceAt(rookSquare)?.let {
                             it.chessman == Chessman.ROOK && it.player == player
                         } ?: false
-                    }
-
+                    } else
+                        haveGot = false
 
 //                    is clear
                     isClear = isClearHorizontallyBetween(from, rookSquare)
@@ -211,18 +212,19 @@ object ChessGame : ChessDelegate {
                     if (to.col == 6 && to.row == 7) {
                         rookSquare = Square(7, 7)
                         fromRook = rookSquare
-                        toRook = Square(5,7)
+                        toRook = Square(5, 7)
                         haveGot = haveGot && pieceAt(rookSquare)?.let {
                             it.chessman == Chessman.ROOK && it.player == player
                         } ?: false
                     } else if (to.col == 2 && to.row == 7) {
                         rookSquare = Square(0, 7)
-                        toRook = Square(3,7)
+                        toRook = Square(3, 7)
                         fromRook = rookSquare
                         haveGot = haveGot && pieceAt(rookSquare)?.let {
                             it.chessman == Chessman.ROOK && it.player == player
                         } ?: false
-                    }
+                    } else
+                        haveGot = false
 
 
 //                    is clear
@@ -248,9 +250,8 @@ object ChessGame : ChessDelegate {
                 TODO("orientation false")
             }
             if (haveGot && isClear && isNotMove && isOppositeSideBoards) {
-
-                movePiecePrivate(fromRook!!, toRook!!)
-                moves.removeAt(moves.size - 1)
+//
+                movePiecePrivate(fromRook!!, toRook!!, true)
                 return true
             }
         }
@@ -446,8 +447,7 @@ object ChessGame : ChessDelegate {
 
     fun showMove(isForward: Boolean = true, exactlyPosition: Int? = null) {
         reset()
-        var position = 0
-        position = if (exactlyPosition != null) {
+        val position: Int = if (exactlyPosition != null) {
             exactlyPosition
         } else {
             if (isForward) {
@@ -460,11 +460,15 @@ object ChessGame : ChessDelegate {
             moves.size + backwardPosition - 1
         }
 
+        val moveList = mutableListOf<Move>()
+        moveList.addAll(moves)
+        moves.clear()
+
         if (position >= 0) {
             for (i in 0..position) {
-                val move = moves[i]
+                val move = moveList[i]
                 val from = Square(move.piece.col, move.piece.row)
-                movePiecePrivate(from, move.toSquare, true)
+                movePiece(from, move.toSquare, true)
             }
         }
     }
