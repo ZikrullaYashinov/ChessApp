@@ -136,11 +136,13 @@ object ChessGame : ChessDelegate {
     }
 
     private fun canRookMove(from: Square, to: Square): Boolean {
+        if (from == to) return false
         return from.col == to.col && isClearVerticallyBetween(from, to)
                 || from.row == to.row && isClearHorizontallyBetween(from, to)
     }
 
     private fun canBishopMove(from: Square, to: Square): Boolean {
+        if (from == to) return false
         return abs(from.col - to.col) == abs(from.row - to.row)
                 && isClearDiagonallyBetween(from, to)
     }
@@ -165,6 +167,7 @@ object ChessGame : ChessDelegate {
             val isClear: Boolean
             var isOppositeSideBoards = true
             var isNotMove = true
+            val playerOpposite = if (player == Player.WHITE) Player.BLACK else Player.WHITE
             if (orientation == null || orientation == true) {
                 if (player == Player.WHITE) {
 //                    have got
@@ -191,11 +194,11 @@ object ChessGame : ChessDelegate {
                     isClear = isClearHorizontallyBetween(from, rookSquare)
 
 //                    is not opposite side
-                    val start = min(from.col, to.col)
+                    val start = if (to.col == 6) 1 else min(from.col, to.col)
                     val end = max(from.col, to.col)
                     for (col in start..end) {
                         isOppositeSideBoards = isOppositeSideBoards &&
-                                isOppositeSide(player, Square(col, 0), from)
+                                !isOppositeSide(playerOpposite, Square(col, 0))
                     }
 
 //                    is not move
@@ -231,11 +234,11 @@ object ChessGame : ChessDelegate {
                     isClear = isClearHorizontallyBetween(from, rookSquare)
 
 //                    is not opposite side
-                    val start = min(from.col, to.col)
+                    val start = if (to.col == 2) 1 else min(from.col, to.col)
                     val end = max(from.col, to.col)
                     for (col in start..end) {
                         isOppositeSideBoards = isOppositeSideBoards &&
-                                isOppositeSide(player, Square(col, 7), from)
+                                !isOppositeSide(playerOpposite, Square(col, 7))
                     }
 
 //                    is not move
@@ -320,7 +323,7 @@ object ChessGame : ChessDelegate {
                         Square(findKing.col, findKing.row)
                     }
                     val oppositeSide =
-                        isOppositeSide(oppositePlayer = playerOpposite, to, myKingSquare = square)
+                        isOppositeSide(oppositePlayer = playerOpposite, to)
                     val r = canKingMove(from, to, oppositeSide, piece.player)
 
                     return r
@@ -372,7 +375,7 @@ object ChessGame : ChessDelegate {
         return null
     }
 
-    private fun isOppositeSide(oppositePlayer: Player, to: Square, myKingSquare: Square?): Boolean {
+    private fun isOppositeSide(oppositePlayer: Player, to: Square): Boolean {
         piecesBox.forEach { piece ->
             if (piece.player == oppositePlayer) {
                 val fromPiece = Square(piece.col, piece.row)
