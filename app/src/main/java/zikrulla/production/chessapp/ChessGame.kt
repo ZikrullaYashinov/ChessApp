@@ -60,7 +60,7 @@ object ChessGame : ChessDelegate {
     override fun movePiece(from: Square, to: Square, isShow: Boolean?): Boolean {
         val isMove = if (moves.size % 2 == 0) Player.WHITE else Player.BLACK
         val checkKing = isCheckKing(isMove)
-        val r = canMove(from, to, isMove, checkKing)
+        val r = canMove(from, to, isMove)
         if (r) {
             val moveSuccess = movePiecePrivate(from, to)
             if (isCheckKing(isMove) && moveSuccess) {
@@ -301,11 +301,10 @@ object ChessGame : ChessDelegate {
         }
     }
 
-    fun canMove(
+    private fun canMove(
         from: Square,
         to: Square,
-        isMove: Player? = null,
-        checkKing: Boolean? = null
+        isMove: Player? = null
     ): Boolean {
         if (from.row == to.row && from.col == to.col) return false
         val piece = pieceAt(from) ?: return false
@@ -315,44 +314,33 @@ object ChessGame : ChessDelegate {
 
         when (piece.chessman) {
             Chessman.KING -> {
-                if (isMove == null) {
-                    val r = canKingMove(from, to)
-                    return r
+                return if (isMove == null) {
+                    canKingMove(from, to)
                 } else {
-                    val square = findKing(playerOpposite)?.let { findKing ->
-                        Square(findKing.col, findKing.row)
-                    }
-                    val oppositeSide =
-                        isOppositeSide(oppositePlayer = playerOpposite, to)
-                    val r = canKingMove(from, to, oppositeSide, piece.player)
+                    val oppositeSide = isOppositeSide(oppositePlayer = playerOpposite, to)
 
-                    return r
+                    canKingMove(from, to, oppositeSide, piece.player)
                 }
             }
 
             Chessman.QUEEN -> {
-                val r = canQueenMove(from, to)
-                return r
+                return canQueenMove(from, to)
             }
 
             Chessman.ROOK -> {
-                val r = canRookMove(from, to)
-                return r
+                return canRookMove(from, to)
             }
 
             Chessman.BISHOP -> {
-                val r = canBishopMove(from, to)
-                return r
+                return canBishopMove(from, to)
             }
 
             Chessman.KNIGHT -> {
-                val r = canKnightMove(from, to)
-                return r
+                return canKnightMove(from, to)
             }
 
             Chessman.PAWN -> {
-                val r = canPawnMove(from, to, piece.player, false)
-                return r
+                return canPawnMove(from, to, piece.player, false)
             }
         }
     }
