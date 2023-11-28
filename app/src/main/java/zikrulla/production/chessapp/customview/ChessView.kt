@@ -24,8 +24,10 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private var originY = 0f
     private var cellSide = 0f
     private var scaleFactor = 1f
-    private val lightColor = Color.parseColor("#779854")
-    private val darkColor = Color.parseColor("#E8ECCB")
+    private var showSelectedMenu = false
+    private val darkColor = Color.parseColor("#779854")
+    private val lightColor = Color.parseColor("#E8ECCB")
+    private val whiteColor = Color.parseColor("#FEFEFE")
     private val paint = Paint()
     private val imgResourceIds = setOf(
         R.drawable.chess_klt,
@@ -58,7 +60,8 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         setSize()
         drawChessBoard(canvas)
         drawPieces(canvas)
-
+//        drawSelectedFigures(canvas, Square(0, 0), true)
+//        drawSelectedFigures(canvas, Square(5, 0), false)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -152,8 +155,47 @@ class ChessView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         }
     }
 
-    private fun drawSquareAt(canvas: Canvas, col: Int, row: Int, isDark: Boolean) {
-        paint.color = if (isDark) darkColor else lightColor
+
+    fun drawSelectedFigures(canvas: Canvas, square: Square, isWhite: Boolean) {
+        showSelectedMenu = true
+        val figuresWhite = listOf(
+            R.drawable.chess_qlt,
+            R.drawable.chess_nlt,
+            R.drawable.chess_rlt,
+            R.drawable.chess_blt
+        )
+        val figuresBlack = listOf(
+            R.drawable.chess_qdt,
+            R.drawable.chess_ndt,
+            R.drawable.chess_rdt,
+            R.drawable.chess_bdt
+        )
+
+        var i = 0
+        if (isWhite) {
+            for (row in square.row..square.row + 3) {
+                drawSquareAt(canvas, square.col, row, color = whiteColor)
+                drawPieceAt(canvas, square.col, 7 - row, figuresWhite[i])
+                i++
+            }
+        } else {
+            for (row in square.row..square.row + 3) {
+                drawSquareAt(canvas, square.col, row, color = whiteColor)
+                drawPieceAt(canvas, square.col, 7 - row, figuresBlack[i])
+                i++
+            }
+        }
+    }
+
+    private fun drawSquareAt(
+        canvas: Canvas,
+        col: Int,
+        row: Int,
+        isDark: Boolean? = null,
+        color: Int? = null
+    ) {
+        paint.color = if (isDark == true) darkColor else lightColor
+        color?.let { paint.color = it }
         canvas.drawRect(
             originX + col * cellSide,
             originY + row * cellSide,

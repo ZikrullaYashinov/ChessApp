@@ -1,5 +1,6 @@
 package zikrulla.production.chessapp
 
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +44,10 @@ class MainActivity : AppCompatActivity(), ChessDelegate {
         val result = ChessGame.movePiece(from, to)
         binding.chessView.invalidate()
         return result
+    }
+
+    override fun drawSelectedFigures(canvas: Canvas, square: Square) {
+        TODO("Not yet implemented")
     }
 
 

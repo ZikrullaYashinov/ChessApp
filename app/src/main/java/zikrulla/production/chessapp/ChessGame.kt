@@ -1,5 +1,6 @@
 package zikrulla.production.chessapp
 
+import android.graphics.Canvas
 import zikrulla.production.chessapp.model.ChessPiece
 import zikrulla.production.chessapp.model.Chessman
 import zikrulla.production.chessapp.model.Move
@@ -70,6 +71,10 @@ object ChessGame : ChessDelegate {
             return true
         }
         return false
+    }
+
+    override fun drawSelectedFigures(canvas: Canvas, square: Square) {
+        TODO("Not yet implemented")
     }
 
     private fun movePiecePrivate(from: Square, to: Square, isShow: Boolean? = null): Boolean {
